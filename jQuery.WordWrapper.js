@@ -63,15 +63,19 @@
                 words = text.split(' ');
 
             words.forEach(function (word, i, words_arr) {
-                var letters = word.split('');
 
-                letters.forEach(function (letter, j, letters_arr) {
-                    if (utils.isNeedHyphen(j, letters_arr)) {
-                        letters_arr[j] += SOFT_HYPHEN;
-                    }
+                var subWords = word.split('-');
+                subWords.forEach(function(subWord, j, subWords_arr){
+                    var letters = subWord.split('');
+                    letters.forEach(function(letter, k, letters_arr){
+                        if (utils.isNeedHyphen(k, letters_arr)) {
+                            letters_arr[k] += SOFT_HYPHEN;
+                        }
+                    });
+                    subWord = letters.join('');
+                    subWords_arr[j] = subWord;
                 });
-
-                word = letters.join('');
+                word = subWords.join('-');
                 words_arr[i] = word;
             });
 
@@ -92,7 +96,7 @@
 
         function isConsonantWithNextVowel(pos, arr) {
             var cur = utils.getLetter(pos, arr),
-                next = utils.getLetter(pos, arr + 1);
+                next = utils.getLetter(pos + 1, arr);
             return utils.isConsonant(cur) && utils.isVowel(next);
         }
 
@@ -125,21 +129,21 @@
 
         function ifVowelWithNextKratkaya(pos, arr) {
             var cur = utils.getLetter(pos, arr),
-                next = utils.getLetter(pos, arr + 1);
+                next = utils.getLetter(pos + 1, arr);
             return utils.isVowel(cur) && next === 'й';
         }
 
         function isConsonantWithNextLetterSign(pos, arr) {
             var cur = utils.getLetter(pos, arr),
-                next = utils.getLetter(pos, arr + 1);
+                next = utils.getLetter(pos + 1, arr);
             return utils.isConsonant(cur) && (next === 'ь' || next === 'ъ');
         }
 
         function isDoubleConsonantWithVowels(pos, arr) {
             var cur = utils.getLetter(pos, arr),
-                next = utils.getLetter(pos, arr + 1),
-                afterNext = utils.getLetter(pos, arr + 2),
-                afterAfterNext = utils.getLetter(pos, arr + 2);
+                next = utils.getLetter(pos + 1, arr),
+                afterNext = utils.getLetter(pos + 2, arr),
+                afterAfterNext = utils.getLetter(pos + 2, arr);
 
             return (next === afterNext)
                 && utils.isConsonant(next)
@@ -148,11 +152,11 @@
         }
 
         function isConsonant(s) {
-            return s && consonants.indexOf(s.toLowerCase()) + 1;
+            return Boolean(s && consonants.indexOf(s.toLowerCase()) + 1);
         }
 
         function isVowel(s) {
-            return s && vowels.indexOf(s.toLowerCase()) + 1;
+            return Boolean(s && vowels.indexOf(s.toLowerCase()) + 1);
         }
 
         function getLetter(pos, arr) {
@@ -164,7 +168,7 @@
         // разбивать односложную приставку, если
         // за приставкой идет согласный.
         function ifOneSyllablePrefixWithNextConsonant(pos, arr) {
-            var next = utils.getLetter(pos, arr + 1);
+            var next = utils.getLetter(pos + 1, arr);
             return utils.ifInsideOfOneSyllablePrefix(pos, arr)
                 && utils.isConsonant(next);
         }
